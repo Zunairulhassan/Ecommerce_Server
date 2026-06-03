@@ -24,6 +24,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
+      "http://localhost:5174",
       "https://ecommerce-admin-flax-eta.vercel.app",
       "https://ecommerce-admin-ig20vfa9n-zunair-ul-hassans-projects.vercel.app",
       "https://ecommerceclient-a87gtq9lo-zunair-ul-hassans-projects.vercel.app",

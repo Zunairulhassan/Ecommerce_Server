@@ -24,6 +24,15 @@ export async function uploadedImages(request, response) {
       });
     }
 
+    // ✅ Check if Cloudinary is configured
+    if (!process.env.cloudinary_Config_Cloud_name) {
+      console.error("❌ Cloudinary not configured - missing cloud_name");
+      return response.status(500).json({
+        message: "Server configuration error - Cloudinary not setup",
+        success: false,
+      });
+    }
+
     const options = {
       use_filename: true,
       unique_filename: false,
@@ -33,12 +42,17 @@ export async function uploadedImages(request, response) {
 
     // ✅ Upload images to Cloudinary
     for (let i = 0; i < images.length; i++) {
-      const result = await cloudinary.uploader.upload(images[i].path, options);
-      uploadedImages.push(result.secure_url);
+      try {
+        const result = await cloudinary.uploader.upload(images[i].path, options);
+        uploadedImages.push(result.secure_url);
 
-      // ✅ Remove temp file after upload
-      if (fs.existsSync(images[i].path)) {
-        fs.unlinkSync(images[i].path);
+        // ✅ Remove temp file after upload
+        if (fs.existsSync(images[i].path)) {
+          fs.unlinkSync(images[i].path);
+        }
+      } catch (uploadError) {
+        console.error(`❌ Cloudinary upload failed for file ${i}:`, uploadError.message);
+        throw uploadError;
       }
     }
 
@@ -49,6 +63,7 @@ export async function uploadedImages(request, response) {
       images: uploadedImages,
     });
   } catch (error) {
+    console.error("❌ Upload error:", error);
     return response.status(500).json({
       message: "Something went wrong while uploading images",
       error: error.message,

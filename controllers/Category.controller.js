@@ -252,6 +252,14 @@ export async function deleteCategory(request, response) {
           // console.log(error, result);
         });
       }
+      if (res) {
+        return response.status(200).json({
+          error: false,
+          success:true,
+          message:"image deleted successfully"
+        })
+      }
+
     }
 
     const subCategory = await CategoryModel.find({ parentID: request.params.id });

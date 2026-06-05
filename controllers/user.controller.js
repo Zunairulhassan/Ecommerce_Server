@@ -753,28 +753,46 @@ export async function userAvatarController(request, response) {
   }
 }
 
-export async function removeImageFromCloudinary(request, response) {  // ✅ spelling fix
-  const imgUrl = request.query.img1;
+export async function removeImageFromCloudinary(request, response) {
+  try {
+    // ✅ Get image URL from request body (sent by axios.delete with data property)
+    const imgUrl = request.body.image;
 
-  const urlArr = imgUrl.split("/");
-  const image = urlArr[urlArr.length - 1];
-
-  const imageName = image.split(".")[0];
-
-  if (imageName) {
-    try {
-      const res = await cloudinary.uploader.destroy(imageName); // ✅ await + no callback
-
-      if (res) {
-        response.status(200).json(res);
-      }
-    } catch (error) {
-      return response.status(500).json({
-        message: error.message || error,
+    // Validate image URL
+    if (!imgUrl) {
+      return response.status(400).json({
+        message: 'Image URL is required',
         error: true,
         success: false,
       });
     }
+
+    const urlArr = imgUrl.split("/");
+    const image = urlArr[urlArr.length - 1];
+    const imageName = image.split(".")[0];
+
+    if (!imageName) {
+      return response.status(400).json({
+        message: 'Invalid image URL format',
+        error: true,
+        success: false,
+      });
+    }
+
+    const result = await cloudinary.uploader.destroy(imageName);
+
+    return response.status(200).json({
+      message: 'Image deleted from Cloudinary successfully',
+      success: true,
+      result: result,
+    });
+  } catch (error) {
+    console.error('[removeImageFromCloudinary error]:', error.message);
+    return response.status(500).json({
+      message: 'Failed to delete image from Cloudinary',
+      error: error.message,
+      success: false,
+    });
   }
 }
 

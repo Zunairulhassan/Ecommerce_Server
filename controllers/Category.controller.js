@@ -60,7 +60,9 @@ export async function uploadedImages(request, response) {
     return response.status(201).json({
       message: "Images uploaded successfully!",
       success: true,
-      images: uploadedImages,
+      data: {
+        images: uploadedImages,
+      },
     });
   } catch (error) {
     console.error("❌ Upload error:", error);
